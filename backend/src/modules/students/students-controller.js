@@ -7,14 +7,6 @@ const {
   updateStudent,
 } = require("./students-service");
 
-const asyncHandler = require("express-async-handler");
-const {
-  getAllStudents,
-  addNewStudent,
-  getStudentDetail,
-  setStudentStatus,
-  updateStudent,
-} = require("./students-service");
 
 // GET all students
 const handleGetAllStudents = asyncHandler(async (req, res) => {
