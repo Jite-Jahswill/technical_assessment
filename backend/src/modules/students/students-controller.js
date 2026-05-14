@@ -7,69 +7,82 @@ const {
   updateStudent,
 } = require("./students-service");
 
-
-// GET all students
+/**
+ * GET /api/v1/students
+ * Query params: name, className, section, roll
+ */
 const handleGetAllStudents = asyncHandler(async (req, res) => {
-  const students = await getAllStudents(req.query);
+  const { name, className, section, roll } = req.query;
+
+  const students = await getAllStudents({ name, className, section, roll });
 
   res.status(200).json({
-    success: true,
     message: "Students fetched successfully",
     data: students,
   });
 });
 
-// ADD student
+/**
+ * POST /api/v1/students
+ * Body: student payload (name, email, class, section, etc.)
+ */
 const handleAddStudent = asyncHandler(async (req, res) => {
-  const result = await addNewStudent(req.body);
+  // Attach the logged-in user as the reporter
+  const payload = { ...req.body, reporterId: req.user.id };
+
+  const result = await addNewStudent(payload);
 
   res.status(201).json({
-    success: true,
     message: result.message,
   });
 });
 
-// UPDATE student
+/**
+ * PUT /api/v1/students/:id
+ * Body: updated student fields
+ */
 const handleUpdateStudent = asyncHandler(async (req, res) => {
-  const id = req.params.id;
+  const { id } = req.params;
 
-  const result = await updateStudent({
-    id,
-    ...req.body,
-  });
+  // id goes into payload so addOrUpdateStudent knows it's an update, not an insert
+  const payload = { ...req.body, id: Number(id) };
+
+  const result = await updateStudent(payload);
 
   res.status(200).json({
-    success: true,
     message: result.message,
   });
 });
 
-// GET student detail
+/**
+ * GET /api/v1/students/:id
+ */
 const handleGetStudentDetail = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const student = await getStudentDetail(id);
+  const student = await getStudentDetail(Number(id));
 
   res.status(200).json({
-    success: true,
     message: "Student detail fetched successfully",
     data: student,
   });
 });
 
-// UPDATE student status
+/**
+ * PATCH /api/v1/students/:id/status
+ * Body: { status: true | false }
+ */
 const handleStudentStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
   const result = await setStudentStatus({
-    userId: id,
-    reviewerId: req.user?.id || null, // if auth middleware exists
+    userId: Number(id),
+    reviewerId: req.user.id,
     status,
   });
 
   res.status(200).json({
-    success: true,
     message: result.message,
   });
 });
